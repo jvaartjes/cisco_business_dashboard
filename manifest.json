@@ -1,0 +1,9 @@
+{
+  "domain": "cisco_business_dashboard",
+  "name": "Cisco Business Dashboard",
+  "config_flow": true,
+  "documentation": "https://github.com/jvaartjes/cisco_business_dashboard",
+  "requirements": ["ciscobusinessdashboard>=0.0.0"],
+  "codeowners": ["@jvaartjes"],
+  "iot_class": "local_polling"
+}

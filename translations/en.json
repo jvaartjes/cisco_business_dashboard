@@ -1,0 +1,25 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured",
+            "cannot_connect": "Failed to connect",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "dashboard": "Hostname",
+                    "keyid": "Key ID",
+                    "secret": "API Key (Secret)",
+                    "appname": "Application Name",
+                    "verify_cbd_cert": "Verify SSL Certifcate?",
+                    "clientid": "Client ID (optional)",
+                    "port": "TCP Portnumber (default=443)",
+                    "organisation": "Organisation (Default)"
+                },
+                "title": "Setup Cisco Business Dashboard"
+            }
+        }
+    },
+    "title": "Cisco Business Dashboard"
+}

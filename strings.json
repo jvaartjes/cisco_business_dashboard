@@ -4,9 +4,13 @@
     "step": {
       "user": {
         "title": "Setup Cisco Business Dashboard",
-        "dashboard": "[%key:common::config_flow::data::host%]",
-        "keyid": "[%key:common::config_flow::data::username%]",
-        "secret": "[%key:common::config_flow::data::password%]"
+        "dashboard": "[%key:common::config_flow::data::dashboard%]",
+        "keyid": "[%key:common::config_flow::data::keyid%]",
+        "secret": "[%key:common::config_flow::data::secret%]",
+        "port": "[%key:common::config_flow::data::port%]",
+        "appname": "[%key:common::config_flow::data::appname%]",
+        "clientid": "[%key:common::config_flow::data::clientid%]",
+        "organisation": "[%key:common::config_flow::data::organisation%]"
       }
     },
     "abort": {

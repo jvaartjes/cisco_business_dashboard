@@ -4,15 +4,11 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from aiohttp import ClientResponseError
-import ciscobusinessdashboard
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers import aiohttp_client
 from homeassistant.exceptions import HomeAssistantError
 
 from .const import DOMAIN
@@ -22,13 +18,10 @@ _LOGGER = logging.getLogger(__name__)
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required("dashboard"): str,
-        vol.Optional("port"): str,
+        vol.Optional("port", default="443"): str,
         vol.Required("keyid"): str,
         vol.Required("secret"): str,
-        vol.Required("appname"): str,
-        vol.Optional("clientid"): str,
-        vol.Required("verify_cbd_cert"): bool,
-        vol.Optional("organisation"): str,
+        vol.Optional("organisation", default="Default"): str,
     }
 )
 
@@ -72,7 +65,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     # InvalidAuth
 
     # Return info that you want to store in the config entry.
-    return {"title": "Name of the device"}
+    return {"title": data["dashboard"]}
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):

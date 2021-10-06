@@ -1,10 +1,10 @@
 """The Cisco Business Dashboard integration."""
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
 import async_timeout
-import ciscobusinessdashboard
 
+import ciscobusinessdashboard
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client

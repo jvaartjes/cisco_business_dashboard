@@ -2,17 +2,24 @@
     "config": {
         "abort": {
             "already_configured": "Apparaat is al geconfigureerd",
-            "cannot_connect": "Kan geen verbinding maken",
-            "unknown": "Onverwachte fout"
+            "cannot_connect": "Fout by verbinden",
+            "unknown": "Fout opgetreden"
         },
         "step": {
             "user": {
                 "data": {
-                    "garage_name": "Garage naam"
+                    "dashboard": "Hostnaam",
+                    "keyid": "Key ID",
+                    "secret": "API Key (Secret)",
+                    "appname": "Applicatie Name",
+                    "verify_cbd_cert": "Verifieer SSL Certifcaat?",
+                    "clientid": "Client ID (optioneel)",
+                    "port": "TCP Portnummer (standaard=443)",
+                    "organisation": "Organisatie (Default)"
                 },
-                "title": "Kies een garage om te monitoren"
+                "title": "Instellen Cisco Business Dashboard"
             }
         }
     },
-    "title": "Garages Amsterdam"
+    "title": "Cisco Business Dashboard"
 }

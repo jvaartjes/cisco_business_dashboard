@@ -3,42 +3,41 @@ from __future__ import annotations
 
 import logging
 from typing import Any
+from aiohttp.client_reqrep import ClientRequest, ClientResponse
 
 import voluptuous as vol
+import ciscobusinessdashboard
 
-from homeassistant import config_entries
+from homeassistant import config_entries, core, exceptions
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import aiohttp_client
+from aiohttp import ClientSession, ClientResponseError, ClientConnectorError
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    CONF_SECRET,
+    CONF_PORT,
+    CONF_KEYID,
+    CONF_APPNAME,
+    CONF_DASHBOARD,
+    CONF_CLIENTID,
+    CONF_ORGANISATION,
+)
+
 
 _LOGGER = logging.getLogger(__name__)
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required("dashboard"): str,
-        vol.Optional("port", default="443"): str,
-        vol.Required("keyid"): str,
-        vol.Required("secret"): str,
-        vol.Optional("organisation", default="Default"): str,
+        vol.Required(CONF_DASHBOARD): str,
+        vol.Optional(CONF_PORT, default="443"): str,
+        vol.Optional(CONF_KEYID): str,
+        vol.Optional(CONF_SECRET): str,
+        vol.Optional(CONF_ORGANISATION, default="Default"): str,
     }
 )
-
-
-class PlaceholderHub:
-    """Placeholder class to make tests pass.
-
-    TODO Remove this placeholder class and replace with things from your PyPI package.
-    """
-
-    def __init__(self, host: str) -> None:
-        """Initialize."""
-        self.host = host
-
-    async def authenticate(self, username: str, password: str) -> bool:
-        """Test if we can authenticate with the host."""
-        return True
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
@@ -46,26 +45,23 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
-    # TODO validate the data can be used to set up a connection.
+    dashboard = data[CONF_DASHBOARD]
+    port = data[CONF_PORT]
+    keyid = data.get(CONF_KEYID)
+    secret = data.get(CONF_SECRET)
+    clientid = None
+    appname = data[CONF_DASHBOARD]
 
-    # If your PyPI package is not built with async, pass your methods
-    # to the executor:
-    # await hass.async_add_executor_job(
-    #     your_validate_func, data["username"], data["password"]
-    # )
+    _LOGGER.debug("Connecting to %s:%s over HTTPS", dashboard, port)
+    token = ciscobusinessdashboard.getToken(keyid, secret, clientid, appname)
 
-    # hub = PlaceholderHub(data["dashboard"])
-
-    # if not await hub.authenticate(data["dashboard"], data["secret"]):
-    #     raise InvalidAuth
-
-    # If you cannot connect:
-    # throw CannotConnect
-    # If the authentication is wrong:
-    # InvalidAuth
+    resp = await aiohttp_client.async_get_clientsession(hass).get(
+        "https://%s:%s/api/v2/orgs" % (dashboard, port),
+        headers={"Authorization": "Bearer %s" % token},
+    )
 
     # Return info that you want to store in the config entry.
-    return {"title": data["dashboard"]}
+    return resp
 
 
 class CiscoBDConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -78,7 +74,7 @@ class CiscoBDConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Handle the initial step."""
         if user_input is not None:
-            await self.async_set_unique_id(user_input.get("dashboard"))
+            await self.async_set_unique_id(user_input.get(CONF_DASHBOARD))
             self._abort_if_unique_id_configured()
 
         if user_input is None:
@@ -90,16 +86,26 @@ class CiscoBDConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         try:
             info = await validate_input(self.hass, user_input)
-        except CannotConnect:
+        except ClientResponseError:
             errors["base"] = "cannot_connect"
-        except InvalidAuth:
-            errors["base"] = "invalid_auth"
+        except ClientConnectorError:
+            errors["base"] = "cannot_connect"
         except Exception:  # pylint: disable=broad-except
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
         else:
-            return self.async_create_entry(title=info["title"], data=user_input)
+            if info.status == 200:
+                return self.async_create_entry(
+                    title=user_input[CONF_DASHBOARD], data=user_input
+                )
+            if info.status == 401:
+                _LOGGER.warn("401")
+                errors["base"] = "unauthorized"
+            if info.status == 404:
+                _LOGGER.warn("404")
+                errors["base"] = "wronghost"
 
+        _LOGGER.warn(info)
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )

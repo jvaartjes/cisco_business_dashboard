@@ -68,7 +68,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     return {"title": data["dashboard"]}
 
 
-class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class CiscoBDConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Jochem Ex."""
 
     VERSION = 1
@@ -77,6 +77,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the initial step."""
+        if user_input is not None:
+            await self.async_set_unique_id(user_input.get("dashboard"))
+            self._abort_if_unique_id_configured()
+
         if user_input is None:
             return self.async_show_form(
                 step_id="user", data_schema=STEP_USER_DATA_SCHEMA

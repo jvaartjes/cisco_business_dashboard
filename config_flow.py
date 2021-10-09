@@ -3,26 +3,23 @@ from __future__ import annotations
 
 import logging
 from typing import Any
-from aiohttp.client_reqrep import ClientRequest, ClientResponse
 
 import voluptuous as vol
 import ciscobusinessdashboard
 
-from homeassistant import config_entries, core, exceptions
+from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import aiohttp_client
-from aiohttp import ClientSession, ClientResponseError, ClientConnectorError
+from aiohttp import ClientResponseError, ClientConnectorError
 
 from .const import (
     DOMAIN,
     CONF_SECRET,
     CONF_PORT,
     CONF_KEYID,
-    CONF_APPNAME,
     CONF_DASHBOARD,
-    CONF_CLIENTID,
     CONF_ORGANISATION,
 )
 
@@ -99,13 +96,13 @@ class CiscoBDConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     title=user_input[CONF_DASHBOARD], data=user_input
                 )
             if info.status == 401:
-                _LOGGER.warn("401")
+                _LOGGER.warning("401")
                 errors["base"] = "unauthorized"
             if info.status == 404:
-                _LOGGER.warn("404")
+                _LOGGER.warning("404")
                 errors["base"] = "wronghost"
 
-        _LOGGER.warn(info)
+        _LOGGER.warning(info)
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )

@@ -20,6 +20,7 @@ from .const import (
     CONF_PORT,
     CONF_KEYID,
     CONF_DASHBOARD,
+    CONF_CLIENTID,
     CONF_ORGANISATION,
 )
 
@@ -38,10 +39,8 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect.
+    """Validate the user input allows us to connect."""
 
-    Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
-    """
     dashboard = data[CONF_DASHBOARD]
     port = data[CONF_PORT]
     keyid = data.get(CONF_KEYID)
@@ -57,7 +56,6 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         headers={"Authorization": "Bearer %s" % token},
     )
 
-    # Return info that you want to store in the config entry.
     return resp
 
 

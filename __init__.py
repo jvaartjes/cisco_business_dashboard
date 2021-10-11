@@ -6,11 +6,18 @@ import async_timeout
 
 import ciscobusinessdashboard
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import aiohttp_client
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.entity import EntityDescription
 
-from .const import DOMAIN
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+    UpdateFailed,
+)
+from homeassistant.const import ATTR_ATTRIBUTION
+
+from .const import DOMAIN, DEFAULT_ATTRIBUTION
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS = ["sensor"]
@@ -65,3 +72,34 @@ async def get_coordinator(
 
     hass.data[DOMAIN] = coordinator
     return coordinator
+
+
+class CiscoBDOrganisationEntity(CoordinatorEntity):
+    """Define a generic Cisco BD Organisation entity."""
+
+    def __init__(
+        self, coordinator: DataUpdateCoordinator, description: EntityDescription
+    ) -> None:
+        """Initialize."""
+        super().__init__(coordinator)
+
+        self._attr_extra_state_attributes = {ATTR_ATTRIBUTION: DEFAULT_ATTRIBUTION}
+        self.entity_description = description
+
+    async def async_added_to_hass(self) -> None:
+        """Register callbacks."""
+
+        @callback
+        def update() -> None:
+            """Update the state."""
+            self.update_from_latest_data()
+            self.async_write_ha_state()
+
+        self.async_on_remove(self.coordinator.async_add_listener(update))
+
+        self.update_from_latest_data()
+
+    @callback
+    def update_from_latest_data(self) -> None:
+        """Update the entity from the latest data."""
+        raise NotImplementedError

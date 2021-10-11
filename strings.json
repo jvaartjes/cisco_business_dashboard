@@ -17,7 +17,8 @@
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
       "unknown": "[%key:common::config_flow::error::unknown%]",
-      "unauthorized": "[%key:common::config_flow::error::unauthorized%]"
+      "unauthorized": "[%key:common::config_flow::error::unauthorized%]",
+      "wronghost": "[%key:common::config_flow::error::wronghost%]"
     }
   }
 }

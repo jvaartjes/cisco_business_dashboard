@@ -20,7 +20,6 @@ from .const import (
     CONF_PORT,
     CONF_KEYID,
     CONF_DASHBOARD,
-    CONF_CLIENTID,
     CONF_ORGANISATION,
 )
 
@@ -49,7 +48,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     appname = data[CONF_DASHBOARD]
 
     _LOGGER.debug("Connecting to %s:%s over HTTPS", dashboard, port)
-    token = ciscobusinessdashboard.getToken(keyid, secret, clientid, appname)
+    token = ciscobusinessdashboard.get_token(keyid, secret, clientid, appname)
 
     resp = await aiohttp_client.async_get_clientsession(hass).get(
         "https://%s:%s/api/v2/orgs" % (dashboard, port),
@@ -93,12 +92,14 @@ class CiscoBDConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(
                     title=user_input[CONF_DASHBOARD], data=user_input
                 )
-            if info.status == 401:
-                _LOGGER.warning("401")
-                errors["base"] = "unauthorized"
-            if info.status == 404:
-                _LOGGER.warning("404")
-                errors["base"] = "wronghost"
+            else:
+                if info.status == 401:
+                    _LOGGER.warning("401")
+                    errors["base"] = "unauthorized"
+                else:
+                    if info.status == 404:
+                        _LOGGER.warning("404")
+                        errors["base"] = "wronghost"
 
         _LOGGER.warning(info)
         return self.async_show_form(
